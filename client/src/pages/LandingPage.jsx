@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Lock, Key, ChevronRight, Users, Database, Globe, CheckCircle, Fingerprint } from 'lucide-react';
+import { Shield, Lock, Key, ChevronRight, Database, Globe, CheckCircle, Fingerprint, Mail, Phone, MapPin, Send } from 'lucide-react';
 
 const LandingPage = () => {
   const GlassCard = ({ children, className = '' }) => (
@@ -27,20 +27,20 @@ const LandingPage = () => {
                 <Shield className="w-4 h-4 text-emerald-400" />
                 <span className="text-white/90 text-sm">Trusted by 1M+ users worldwide</span>
               </div>
-              
+
               <h1 className="text-6xl font-bold text-white leading-tight">
                 Password Security
                 <span className="block text-emerald-400">Simplified.</span>
               </h1>
-              
+
               <p className="text-xl text-white/80 leading-relaxed">
                 One secure vault for all your passwords. Military-grade encryption meets intuitive design.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                onClick={() => window.location.href = '/login'}
-                 className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-white font-semibold transition-all flex items-center justify-center space-x-2">
+                  onClick={() => window.location.href = '/signup'}
+                  className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 rounded-xl text-white font-semibold transition-all flex items-center justify-center space-x-2">
                   <span>Start Now </span>
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -78,7 +78,7 @@ const LandingPage = () => {
                       </div>
                       <Fingerprint className="w-8 h-8 text-emerald-400" />
                     </div>
-                    
+
                     {/* Password Items */}
                     {[1, 2, 3].map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between p-4 rounded-lg backdrop-blur-md bg-white/5 border border-white/10">
@@ -103,7 +103,7 @@ const LandingPage = () => {
 
       {/* Rest of the sections remain the same */}
       {/* Features Section */}
-      <section className="min-h-screen px-4 py-20">
+      <section id='features' className="min-h-screen px-4 py-20">
         <div className="max-w-7xl mx-auto space-y-12">
           <h2 className="text-4xl font-bold text-white text-center">
             Powerful Features for Modern Security
@@ -137,42 +137,42 @@ const LandingPage = () => {
       </section>
 
       {/* Security Section */}
-      <section className="min-h-screen px-6 py-24 bg-gradient-to-r from-blue-800 via-blue-900 to-gray-900">
-  <div className="max-w-6xl mx-auto">
-    <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-8 md:p-12 space-y-10">
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl font-extrabold text-white">
-          Enterprise-Grade Security
-        </h2>
-        <p className="text-lg text-gray-300">
-          Your security is our top priority
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          "256-bit AES encryption",
-          "Zero-knowledge architecture",
-          "Two-factor authentication",
-          "Regular security audits",
-          "Biometric authentication",
-          "Automatic backup",
-        ].map((feature, idx) => (
-          <div
-            key={idx}
-            className="flex items-center space-x-4 bg-white/5 p-4 rounded-lg transition-transform transform hover:scale-105"
-          >
-            <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-            <span className="text-white text-base">{feature}</span>
+      <section className="min-h-screen px-6 py-24 bg-gradient-to-r from-emerald-900 to-green-900">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-8 md:p-12 space-y-10">
+            <div className="text-center space-y-4">
+              <h2 className="text-4xl font-extrabold text-white">
+                Enterprise-Grade Security
+              </h2>
+              <p className="text-lg text-gray-300">
+                Your security is our top priority
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                "256-bit AES encryption",
+                "Zero-knowledge architecture",
+                "Two-factor authentication",
+                "Regular security audits",
+                "Biometric authentication",
+                "Automatic backup",
+              ].map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center space-x-4 bg-white/5 p-4 rounded-lg transition-transform transform hover:scale-105"
+                >
+                  <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+                  <span className="text-white text-base">{feature}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
 
       {/* Pricing Section */}
-      <section className="min-h-screen px-4 py-20">
+      <section id='pricing' className="min-h-screen px-4 py-20">
         <div className="max-w-7xl mx-auto space-y-12">
           <h2 className="text-4xl font-bold text-white text-center">Simple, Transparent Pricing</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -212,6 +212,49 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      <section id="contact-us" className="min-h-screen px-6 py-24 bg-gradient-to-r from-emerald-900 to-green-900">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-8 md:p-12 space-y-10">
+          
+          {/* Heading */}
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl font-extrabold text-white">Get in Touch</h2>
+            <p className="text-lg text-gray-300">We'd love to hear from you</p>
+          </div>
+
+          {/* Contact Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { title: "Email Us", icon: <Mail className="w-6 h-6 text-emerald-400" />, content: "support@yourapp.com" },
+              { title: "Call Us", icon: <Phone className="w-6 h-6 text-emerald-400" />, content: "+1 234 567 890" },
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center space-x-4 bg-white/5 p-4 rounded-lg transition-transform transform hover:scale-105">
+                {item.icon}
+                <div className="text-white">
+                  <h4 className="font-semibold">{item.title}</h4>
+                  <p className="text-gray-300">{item.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Contact Form */}
+          <div className="bg-white/10 p-6 rounded-lg">
+            <h3 className="text-2xl font-bold text-white text-center mb-6">Send a Message</h3>
+            <form className="space-y-4">
+              <input type="text" placeholder="Your Name" className="w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              <input type="email" placeholder="Your Email" className="w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              <textarea placeholder="Your Message" rows="4" className="w-full p-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
+              <button type="submit" className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-lg text-white font-semibold flex items-center justify-center gap-2 transition-all">
+                <Send className="w-5 h-5" /> Send Message
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
     </div>
   );
 };

@@ -1,52 +1,96 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Shield } from 'lucide-react';
 import { usePasswordStore } from '../store/passwordStore';
 import PasswordForm from './password/PasswordForm';
 import PasswordList from './password/PasswordList';
 
+const GlassCard = ({ children, className = '' }) => (
+  <div className={`backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-lg ${className}`}>
+    {children}
+  </div>
+);
+
 const PasswordManager = () => {
-  const { fetchPasswords, passwords } = usePasswordStore();
-  const [search, setSearch] = useState('');
+  const { 
+    fetchPasswords, 
+    passwords, 
+    isLoading, 
+    error,
+    message,
+    searchTerm,
+    setSearchTerm,
+    clearError,
+    clearMessage 
+  } = usePasswordStore();
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     fetchPasswords();
   }, [fetchPasswords]);
 
-  const filteredPasswords = passwords.filter(password =>
-    password.website.toLowerCase().includes(search.toLowerCase()) ||
-    password.username.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(clearMessage, 3000);
+      return () => clearTimeout(timer);
+    }
+    if (error) {
+      const timer = setTimeout(clearError, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, error, clearMessage, clearError]);
+
+  const filteredPasswords = passwords.filter(password => {
+    if (!password) return false;
+    
+    const websiteMatch = password.website?.toLowerCase().includes(searchTerm.toLowerCase() || '');
+    const usernameMatch = password.username?.toLowerCase().includes(searchTerm.toLowerCase() || '');
+    
+    return websiteMatch || usernameMatch;
+  });
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Password Manager</h1>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-        >
-          <Plus size={20} />
-          Add Password
-        </button>
+    <div className="bg-gradient-to-br from-emerald-900 to-green-900 min-h-screen p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+
+        <GlassCard className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <Shield className="text-emerald-400" size={32} />
+              <h1 className="text-3xl font-bold text-emerald-300">Password Vault</h1>
+            </div>
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200"
+            >
+              <Plus size={20} />
+              Add Password
+            </button>
+          </div>
+
+          <div className="relative mb-6">
+            <input
+              type="text"
+              placeholder="Search passwords..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-3 pl-10 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
+            />
+            <Search className="absolute left-3 top-3 text-emerald-400" size={20} />
+          </div>
+
+          {showAddForm && (
+            <PasswordForm onClose={() => setShowAddForm(false)} />
+          )}
+
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400"></div>
+            </div>
+          ) : (
+            <PasswordList passwords={filteredPasswords} />
+          )}
+        </GlassCard>
       </div>
-
-      <div className="mb-6 relative">
-        <input
-          type="text"
-          placeholder="Search passwords..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-3 pl-10 border rounded-lg"
-        />
-        <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-      </div>
-
-      {showAddForm && (
-        <PasswordForm onClose={() => setShowAddForm(false)} />
-      )}
-
-      <PasswordList passwords={filteredPasswords} />
     </div>
   );
 };

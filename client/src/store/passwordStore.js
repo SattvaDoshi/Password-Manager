@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export const API_URL = "http://localhost:5000/api";
 
@@ -18,10 +19,9 @@ export const usePasswordStore = create((set) => ({
   ...initialState,
 
   fetchPasswords: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null });    
     try {
       const response = await axios.get(`${API_URL}/passwords`);
-      // Ensure passwords array is never undefined
       set({ 
         passwords: Array.isArray(response.data) ? response.data : [], 
         isLoading: false 
@@ -29,16 +29,19 @@ export const usePasswordStore = create((set) => ({
     } catch (error) {
       console.error('Error fetching passwords:', error);
       set({ 
-        passwords: [], // Ensure passwords is always an array
+        passwords: [],
         error: error.response?.data?.message || "Error fetching passwords", 
         isLoading: false 
       });
+      toast.error("Failed to fetch passwords");
       throw error;
     }
   },
 
   addPassword: async (passwordData) => {
     set({ isLoading: true, error: null });
+    const loadingToast = toast.loading("Adding password...");
+    
     try {
       const response = await axios.post(`${API_URL}/passwords`, passwordData);
       
@@ -48,9 +51,10 @@ export const usePasswordStore = create((set) => ({
 
       set((state) => ({ 
         passwords: [...state.passwords, response.data],
-        message: "Password added successfully",
         isLoading: false 
       }));
+
+      toast.success("Password added successfully!", { id: loadingToast });
       return response.data;
     } catch (error) {
       console.error('Password creation error:', error);
@@ -58,12 +62,15 @@ export const usePasswordStore = create((set) => ({
         error: error.response?.data?.message || "Error adding password", 
         isLoading: false 
       });
+      toast.error("Failed to add password", { id: loadingToast });
       throw error;
     }
   },
 
   updatePassword: async (id, passwordData) => {
     set({ isLoading: true, error: null });
+    const loadingToast = toast.loading("Updating password...");
+    
     try {
       const response = await axios.put(`${API_URL}/passwords/${id}`, passwordData);
       set((state) => ({
@@ -73,17 +80,22 @@ export const usePasswordStore = create((set) => ({
         message: "Password updated successfully",
         isLoading: false
       }));
+
+      toast.success("Password updated successfully!", { id: loadingToast });
     } catch (error) {
       set({ 
         error: error.response?.data?.message || "Error updating password", 
         isLoading: false 
       });
+      toast.error("Failed to update password", { id: loadingToast });
       throw error;
     }
   },
 
   deletePassword: async (id) => {
     set({ isLoading: true, error: null });
+    const loadingToast = toast.loading("Deleting password...");
+    
     try {
       await axios.delete(`${API_URL}/passwords/${id}`);
       set((state) => ({
@@ -91,11 +103,14 @@ export const usePasswordStore = create((set) => ({
         message: "Password deleted successfully",
         isLoading: false
       }));
+
+      toast.success("Password deleted successfully!", { id: loadingToast });
     } catch (error) {
       set({ 
         error: error.response?.data?.message || "Error deleting password", 
         isLoading: false 
       });
+      toast.error("Failed to delete password", { id: loadingToast });
       throw error;
     }
   },

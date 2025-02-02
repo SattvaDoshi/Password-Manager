@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.route.js";
 import passwordRoutes from "./routes/password.route.js";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -19,9 +20,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
-app.use('/api/password', passwordRoutes);
+app.use('/api', passwordRoutes);
 
 
 

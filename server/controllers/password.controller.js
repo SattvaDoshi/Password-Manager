@@ -4,9 +4,13 @@ import { encryptPassword, decryptPassword } from '../utils/encryption.js';
 export const createPassword = async (req, res) => {
   try {
     const { website, username, password, notes } = req.body;
-    const { masterKey } = req.user;
+    const masterKey = req.masterKey; // Get masterKey from JWT payload
 
     const { encryptedPassword, iv } = encryptPassword(password, masterKey);
+
+    if (!masterKey) {
+      return res.status(401).json({ error: 'Master key not found. Please log in again.' });
+    }
 
     const newPassword = new Password({
       userId: req.user.id,
@@ -26,13 +30,15 @@ export const createPassword = async (req, res) => {
 
 export const getAllPasswords = async (req, res) => {
   try {
+    const masterKey = req.masterKey; // Get masterKey from JWT payload
+
     const passwords = await Password.find({ userId: req.user.id });
-    
+
     const decryptedPasswords = passwords.map(pwd => ({
       id: pwd._id,
       website: pwd.website,
       username: pwd.username,
-      password: decryptPassword(pwd.encryptedPassword, pwd.iv, req.user.masterKey),
+      password: decryptPassword(pwd.encryptedPassword, pwd.iv, masterKey),
       notes: pwd.notes,
       createdAt: pwd.createdAt,
       lastUpdated: pwd.lastUpdated
@@ -47,11 +53,11 @@ export const getAllPasswords = async (req, res) => {
 export const updatePassword = async (req, res) => {
   try {
     const { website, username, password, notes } = req.body;
-    const { masterKey } = req.user;
+    const masterKey = req.masterKey; // Get masterKey from JWT payload
 
-    const passwordEntry = await Password.findOne({ 
-      _id: req.params.id, 
-      userId: req.user.id 
+    const passwordEntry = await Password.findOne({
+      _id: req.params.id,
+      userId: req.user.id
     });
 
     if (!passwordEntry) {
@@ -78,9 +84,9 @@ export const updatePassword = async (req, res) => {
 
 export const deletePassword = async (req, res) => {
   try {
-    const result = await Password.deleteOne({ 
-      _id: req.params.id, 
-      userId: req.user.id 
+    const result = await Password.deleteOne({
+      _id: req.params.id,
+      userId: req.user.id
     });
 
     if (result.deletedCount === 0) {

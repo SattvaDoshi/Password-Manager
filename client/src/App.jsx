@@ -7,9 +7,9 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import SignUpPage from "./pages/auth/SignUpPage";
 import LoginPage from "./pages/auth/LoginPage";
 import EmailVerificationPage from "./pages/auth/EmailVerificationPage";
-import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import PasswordManager from "./pages/PasswordManager";
 
 import { useAuthStore } from "./store/authStore";
 import Navbar from "./components/Navbar";
@@ -49,7 +49,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <DashboardPage />
+                <PasswordManager />
               </ProtectedRoute>
             }
           />

@@ -8,6 +8,11 @@ import {
 	sendWelcomeEmail,
 } from "../utils/mail/emails.js";
 import { User } from "../models/user.model.js";
+import { decryptMasterKey, encryptMasterKey } from "../utils/encryption.js";
+
+const generateMasterKey = () => {
+	return crypto.randomBytes(32).toString('hex');
+};
 
 export const signup = async (req, res) => {
 	const { email, password, name } = req.body;
@@ -18,11 +23,13 @@ export const signup = async (req, res) => {
 		}
 
 		const userAlreadyExists = await User.findOne({ email });
-		console.log("userAlreadyExists", userAlreadyExists);
-
 		if (userAlreadyExists) {
 			return res.status(400).json({ success: false, message: "User already exists" });
 		}
+
+		// Generate and encrypt master key
+		const masterKey = generateMasterKey();
+		const { encrypted: encryptedMasterKey, salt: masterKeySalt } = encryptMasterKey(masterKey, password);
 
 		const hashedPassword = await bcryptjs.hash(password, 10);
 		const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
@@ -32,13 +39,15 @@ export const signup = async (req, res) => {
 			password: hashedPassword,
 			name,
 			verificationToken,
-			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+			encryptedMasterKey,
+			masterKeySalt
 		});
 
 		await user.save();
 
-		// jwt
-		generateTokenAndSetCookie(res, user._id);
+		// Include masterKey in JWT
+		generateTokenAndSetCookie(res, user._id, masterKey);
 
 		await sendVerificationEmail(user.email, verificationToken);
 
@@ -48,6 +57,8 @@ export const signup = async (req, res) => {
 			user: {
 				...user._doc,
 				password: undefined,
+				encryptedMasterKey: undefined,
+				masterKeySalt: undefined
 			},
 		});
 	} catch (error) {
@@ -95,22 +106,30 @@ export const login = async (req, res) => {
 		if (!user) {
 			return res.status(400).json({ success: false, message: "Invalid credentials" });
 		}
+
 		const isPasswordValid = await bcryptjs.compare(password, user.password);
 		if (!isPasswordValid) {
 			return res.status(400).json({ success: false, message: "Invalid credentials" });
 		}
 
-		generateTokenAndSetCookie(res, user._id);
+		// Decrypt master key and include in JWT
+		const masterKey = decryptMasterKey(user.encryptedMasterKey, user.masterKeySalt, password);
+
+		// Include masterKey in JWT
+		const token = generateTokenAndSetCookie(res, user._id, masterKey);
 
 		user.lastLogin = new Date();
 		await user.save();
 
 		res.status(200).json({
 			success: true,
+			token,
 			message: "Logged in successfully",
 			user: {
 				...user._doc,
 				password: undefined,
+				encryptedMasterKey: undefined,
+				masterKeySalt: undefined
 			},
 		});
 	} catch (error) {
@@ -185,7 +204,9 @@ export const resetPassword = async (req, res) => {
 
 export const checkAuth = async (req, res) => {
 	try {
-		const user = await User.findById(req.userId).select("-password");
+		const { userId } = req.params;
+		const user = await User.findById(userId).select("-password");
+
 		if (!user) {
 			return res.status(400).json({ success: false, message: "User not found" });
 		}

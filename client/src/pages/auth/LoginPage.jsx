@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/Input";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
@@ -9,18 +9,20 @@ import toast from "react-hot-toast";
 const LoginPage = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const navigate = useNavigate();
 
 	const { login, isLoading, error } = useAuthStore();
 
 	const handleLogin = async (e) => {
 		e.preventDefault();
-		const success = await login(email, password); // Assuming `login` returns a success status or throws an error
-	
-		if (success) {
+		try{
+
+			await login(email, password); // Assuming `login` returns a success status or throws an error
 			toast.success("Login successful");
-		  navigate("/dashboard"); // Redirect to the dashboard on successful login
-		} else {
-		  console.error("Login failed");
+		  	navigate("/dashboard")
+		}
+		catch(error) {
+		  console.error("Login failed : ",error);
 		  // Handle login failure (e.g., show an error message)
 		}
 	  };

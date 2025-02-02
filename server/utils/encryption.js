@@ -32,3 +32,21 @@ export const decryptPassword = (encryptedPassword, iv, masterKey) => {
   
   return decrypted;
 };
+
+export const encryptMasterKey = (masterKey, password) => {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const key = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256');
+  const cipher = crypto.createCipher('aes-256-cbc', key);
+  let encrypted = cipher.update(masterKey, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return { encrypted, salt };
+};
+
+// Helper function to decrypt master key
+export const decryptMasterKey = (encryptedMasterKey, salt, password) => {
+  const key = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256');
+  const decipher = crypto.createDecipher('aes-256-cbc', key);
+  let decrypted = decipher.update(encryptedMasterKey, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+};

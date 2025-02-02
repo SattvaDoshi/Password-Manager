@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { MenuIcon, XIcon } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
 
 function Navbar() {
   const [toggleMenu, setToggleMenu] = useState(false);
+  const {isAuthenticated,logout} = useAuthStore();
 
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    toast.success("User Logged Out Successfully");
-    window.location.reload();
-    navigate("/login", { replace: true });
+     logout();
   };
 
   return (
@@ -57,12 +56,17 @@ function Navbar() {
                   );
                 })}
               </div>
-              <button
+              {isAuthenticated ? (<button
                 onClick={handleLogout}
                 className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
               >
                 Logout
-              </button>
+              </button>) : (<button
+                onClick={() => navigate("/login")}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+              >
+                Login
+              </button>)}
             </div>
 
             <div className="lg:hidden flex gap-3 items-center">

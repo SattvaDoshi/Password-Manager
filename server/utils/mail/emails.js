@@ -21,6 +21,7 @@ export const sendVerificationEmail = async (email, verificationToken) => {
     }
 };
 
+
 export const sendWelcomeEmail = async (email, name) => {
     try {
         const response = await transporter.sendMail({

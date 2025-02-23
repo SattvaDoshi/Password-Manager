@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({ 
-	origin: "http://localhost:5173", 
+	origin: "*", 
 	credentials: true 
 }));
 
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-app.get('/test', (req, res) => res.send("Server is running"));
+app.get('/', (req, res) => res.send("Server is running"));
 app.use("/api/auth", authRoutes);
 app.use('/api', passwordRoutes);
 

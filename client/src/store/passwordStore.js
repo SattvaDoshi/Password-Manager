@@ -4,8 +4,38 @@ import toast from "react-hot-toast";
 
 export const API_URL = "https://password-manager-bhuw.onrender.com/api";
 
-axios.defaults.withCredentials = true;
-axios.defaults.headers.common['Content-Type'] = 'application/json';
+// Create axios instance with default config
+const passwordAxios = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add request interceptor for authentication
+passwordAxios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+// Add response interceptor for error handling
+passwordAxios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      toast.error("Session expired. Please login again.");
+      // Optional: Trigger logout or redirect to login
+    }
+    return Promise.reject(error);
+  }
+);
 
 const initialState = {
   passwords: [],
@@ -21,7 +51,7 @@ export const usePasswordStore = create((set) => ({
   fetchPasswords: async () => {
     set({ isLoading: true, error: null });    
     try {
-      const response = await axios.get(`${API_URL}/passwords`);
+      const response = await passwordAxios.get('/passwords');
       set({ 
         passwords: Array.isArray(response.data) ? response.data : [], 
         isLoading: false 
@@ -43,7 +73,7 @@ export const usePasswordStore = create((set) => ({
     const loadingToast = toast.loading("Adding password...");
     
     try {
-      const response = await axios.post(`${API_URL}/passwords`, passwordData);
+      const response = await passwordAxios.post('/passwords', passwordData);
       
       if (!response.data) {
         throw new Error('No data received from server');
@@ -72,7 +102,7 @@ export const usePasswordStore = create((set) => ({
     const loadingToast = toast.loading("Updating password...");
     
     try {
-      const response = await axios.put(`${API_URL}/passwords/${id}`, passwordData);
+      const response = await passwordAxios.put(`/passwords/${id}`, passwordData);
       set((state) => ({
         passwords: state.passwords.map(pwd => 
           pwd.id === id ? { ...pwd, ...response.data } : pwd
@@ -97,7 +127,7 @@ export const usePasswordStore = create((set) => ({
     const loadingToast = toast.loading("Deleting password...");
     
     try {
-      await axios.delete(`${API_URL}/passwords/${id}`);
+      await passwordAxios.delete(`/passwords/${id}`);
       set((state) => ({
         passwords: state.passwords.filter(pwd => pwd.id !== id),
         message: "Password deleted successfully",
@@ -120,3 +150,5 @@ export const usePasswordStore = create((set) => ({
   clearMessage: () => set({ message: null }),
   reset: () => set(initialState)
 }));
+
+export default usePasswordStore;

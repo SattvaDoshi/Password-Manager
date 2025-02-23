@@ -6,21 +6,21 @@ export const API_URL = "https://password-manager-bhuw.onrender.com/api/auth";
 axios.defaults.withCredentials = true;
 
 const authAxios = axios.create({
-	baseURL: API_URL,
-	withCredentials: true,
-	headers: {
-	  'Accept': 'application/json',
-	  'Content-Type': 'application/json'
-	}
-  });
+    baseURL: API_URL,
+    withCredentials: true,
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+});
 
-  authAxios.interceptors.request.use((config) => {
-	const token = localStorage.getItem('token'); // or wherever you store your token
-	if (token) {
-	  config.headers.Authorization = `Bearer ${token}`;
-	}
-	return config;
-  });
+authAxios.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 export const useAuthStore = create((set) => ({
 	user: null,
@@ -41,47 +41,51 @@ export const useAuthStore = create((set) => ({
 		}
 	},
 	login: async (email, password) => {
-		set({ isLoading: true, error: null });
-		try {
-		  const response = await authAxios.post('/login', { email, password });
-		  const { token, user } = response.data;
-		  
-		  localStorage.setItem('userId', user._id);
-		  if (token) {
-			localStorage.setItem('token', token);
-		  }
-		  
-		  set({
-			isAuthenticated: true,
-			user,
-			error: null,
-			isLoading: false,
-		  });
-		} catch (error) {
-		  set({ 
-			error: error.response?.data?.message || "Error logging in", 
-			isLoading: false 
-		  });
-		  throw error;
-		}
-	  },
+        set({ isLoading: true, error: null });
+        try {
+            const response = await authAxios.post('/login', { email, password });
+            const { token, user } = response.data;
+            
+            if (token) {
+                localStorage.setItem('token', token);
+                localStorage.setItem('userId', user._id);
+                // Set token in axios defaults for all future requests
+                authAxios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            }
+            
+            set({
+                isAuthenticated: true,
+                user,
+                error: null,
+                isLoading: false,
+            });
+        } catch (error) {
+            set({ 
+                error: error.response?.data?.message || "Error logging in", 
+                isLoading: false 
+            });
+            throw error;
+        }
+    },
 
-	  logout: async () => {
-		set({ isLoading: true, error: null });
-		try {
-		  await authAxios.post('/logout');
-		  localStorage.clear();
-		  set({ 
-			user: null, 
-			isAuthenticated: false, 
-			error: null, 
-			isLoading: false 
-		  });
-		} catch (error) {
-		  set({ error: "Error logging out", isLoading: false });
-		  throw error;
-		}
-	  },
+    logout: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            await authAxios.post('/logout');
+            localStorage.clear();
+            // Clear token from axios defaults
+            delete authAxios.defaults.headers.common['Authorization'];
+            set({ 
+                user: null, 
+                isAuthenticated: false, 
+                error: null, 
+                isLoading: false 
+            });
+        } catch (error) {
+            set({ error: "Error logging out", isLoading: false });
+            throw error;
+        }
+    },
 	verifyEmail: async (code) => {
 		set({ isLoading: true, error: null });
 		try {

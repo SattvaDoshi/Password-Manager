@@ -14,57 +14,107 @@ const generateMasterKey = () => {
 	return crypto.randomBytes(32).toString('hex');
 };
 
-export const signup = async (req, res) => {
-	const { email, password, name } = req.body;
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid credentials" });
+        }
 
-	try {
-		if (!email || !password || !name) {
-			throw new Error("All fields are required");
-		}
+        const isPasswordValid = await bcryptjs.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ success: false, message: "Invalid credentials" });
+        }
 
-		const userAlreadyExists = await User.findOne({ email });
-		if (userAlreadyExists) {
-			return res.status(400).json({ success: false, message: "User already exists" });
-		}
+        // Decrypt master key with all required parameters
+        const masterKey = decryptMasterKey(
+            user.encryptedMasterKey,
+            user.masterKeySalt,
+            user.masterKeyIv, // Need to add this field to user model
+            password
+        );
 
-		// Generate and encrypt master key
-		const masterKey = generateMasterKey();
-		const { encrypted: encryptedMasterKey, salt: masterKeySalt } = encryptMasterKey(masterKey, password);
+        // Include masterKey in JWT
+        const token = generateTokenAndSetCookie(res, user._id, masterKey);
 
-		const hashedPassword = await bcryptjs.hash(password, 10);
-		const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+        user.lastLogin = new Date();
+        await user.save();
 
-		const user = new User({
-			email,
-			password: hashedPassword,
-			name,
-			verificationToken,
-			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-			encryptedMasterKey,
-			masterKeySalt
-		});
-
-		await user.save();
-
-		// Include masterKey in JWT
-		generateTokenAndSetCookie(res, user._id, masterKey);
-
-		await sendVerificationEmail(user.email, verificationToken);
-
-		res.status(201).json({
-			success: true,
-			message: "User created successfully",
-			user: {
-				...user._doc,
-				password: undefined,
-				encryptedMasterKey: undefined,
-				masterKeySalt: undefined
-			},
-		});
-	} catch (error) {
-		res.status(400).json({ success: false, message: error.message });
-	}
+        res.status(200).json({
+            success: true,
+            token,
+            message: "Logged in successfully",
+            user: {
+                ...user._doc,
+                password: undefined,
+                encryptedMasterKey: undefined,
+                masterKeySalt: undefined,
+                masterKeyIv: undefined
+            },
+        });
+    } catch (error) {
+        console.log("Error in login ", error);
+        res.status(400).json({ success: false, message: error.message });
+    }
 };
+
+// signup function modification
+export const signup = async (req, res) => {
+    const { email, password, name } = req.body;
+
+    try {
+        if (!email || !password || !name) {
+            throw new Error("All fields are required");
+        }
+
+        const userAlreadyExists = await User.findOne({ email });
+        if (userAlreadyExists) {
+            return res.status(400).json({ success: false, message: "User already exists" });
+        }
+
+        // Generate and encrypt master key
+        const masterKey = generateMasterKey();
+        const { encrypted: encryptedMasterKey, salt: masterKeySalt, iv: masterKeyIv } = encryptMasterKey(masterKey, password);
+
+        const hashedPassword = await bcryptjs.hash(password, 10);
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+
+        const user = new User({
+            email,
+            password: hashedPassword,
+            name,
+            verificationToken,
+            verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+            encryptedMasterKey,
+            masterKeySalt,
+            masterKeyIv // Add this new field
+        });
+
+        await user.save();
+
+        // Include masterKey in JWT
+        generateTokenAndSetCookie(res, user._id, masterKey);
+
+        await sendVerificationEmail(user.email, verificationToken);
+
+        res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            user: {
+                ...user._doc,
+                password: undefined,
+                encryptedMasterKey: undefined,
+                masterKeySalt: undefined,
+                masterKeyIv: undefined
+            },
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+
 
 export const verifyEmail = async (req, res) => {
 	const { code } = req.body;
@@ -99,44 +149,7 @@ export const verifyEmail = async (req, res) => {
 	}
 };
 
-export const login = async (req, res) => {
-	const { email, password } = req.body;
-	try {
-		const user = await User.findOne({ email });
-		if (!user) {
-			return res.status(400).json({ success: false, message: "Invalid credentials" });
-		}
 
-		const isPasswordValid = await bcryptjs.compare(password, user.password);
-		if (!isPasswordValid) {
-			return res.status(400).json({ success: false, message: "Invalid credentials" });
-		}
-
-		// Decrypt master key and include in JWT
-		const masterKey = decryptMasterKey(user.encryptedMasterKey, user.masterKeySalt, password);
-
-		// Include masterKey in JWT
-		const token = generateTokenAndSetCookie(res, user._id, masterKey);
-
-		user.lastLogin = new Date();
-		await user.save();
-
-		res.status(200).json({
-			success: true,
-			token,
-			message: "Logged in successfully",
-			user: {
-				...user._doc,
-				password: undefined,
-				encryptedMasterKey: undefined,
-				masterKeySalt: undefined
-			},
-		});
-	} catch (error) {
-		console.log("Error in login ", error);
-		res.status(400).json({ success: false, message: error.message });
-	}
-};
 
 export const logout = async (req, res) => {
 	res.clearCookie("token");

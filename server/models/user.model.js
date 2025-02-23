@@ -28,7 +28,11 @@ const userSchema = new mongoose.Schema(
 		verificationToken: String,
 		verificationTokenExpiresAt: Date,
 		encryptedMasterKey: String,
-		masterKeySalt: String
+		masterKeySalt: String,
+		masterKeyIv: { 
+			type: String, 
+			required: true 
+		}
 	},
 	{ timestamps: true }
 );

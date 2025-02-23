@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-export const API_URL = "http://localhost:5000/api";
+export const API_URL = "https://password-manager-bhuw.onrender.com/api";
 
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';

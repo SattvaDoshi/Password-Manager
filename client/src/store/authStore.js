@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-export const API_URL = "http://localhost:5000/api/auth";
+export const API_URL = "https://password-manager-bhuw.onrender.com/api/auth";
 
 axios.defaults.withCredentials = true;
 

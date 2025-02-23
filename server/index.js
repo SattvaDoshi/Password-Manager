@@ -14,9 +14,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({ 
-	origin: "https://passvault-xi.vercel.app/", 
+	origin: "https://passvault-xi.vercel.app", // Removed the trailing slash
 	credentials: true 
 }));
+
 
 app.use(express.json());
 app.use(cookieParser());

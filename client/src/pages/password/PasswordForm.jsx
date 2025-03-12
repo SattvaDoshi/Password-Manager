@@ -8,7 +8,7 @@ const GlassCard = ({ children, className = '' }) => (
   </div>
 );
 
-const PasswordForm = ({ onClose }) => {
+const PasswordForm = ({ onClose, onSuccess }) => {
   const { addPassword, isLoading } = usePasswordStore();
   const [formData, setFormData] = useState({
     website: '',
@@ -22,8 +22,8 @@ const PasswordForm = ({ onClose }) => {
     try {
       await addPassword(formData);
       setFormData({ website: '', username: '', password: '', notes: '' });
+      if (onSuccess) onSuccess();
       onClose();
-      window.location.reload();
     } catch (error) {
       console.error('Error adding password:', error);
     }

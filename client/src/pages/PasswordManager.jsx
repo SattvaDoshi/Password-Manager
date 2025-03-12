@@ -24,9 +24,10 @@ const PasswordManager = () => {
   } = usePasswordStore();
   const [showAddForm, setShowAddForm] = useState(false);
 
+  // Only fetch passwords once when component mounts
   useEffect(() => {
     fetchPasswords();
-  }, [fetchPasswords]);
+  }, []); // Empty dependency array
 
   useEffect(() => {
     if (message) {
@@ -39,11 +40,16 @@ const PasswordManager = () => {
     }
   }, [message, error, clearMessage, clearError]);
 
+  const handleFormSuccess = () => {
+    setShowAddForm(false);
+  };
+
   const filteredPasswords = passwords.filter(password => {
     if (!password) return false;
     
-    const websiteMatch = password.website?.toLowerCase().includes(searchTerm.toLowerCase() || '');
-    const usernameMatch = password.username?.toLowerCase().includes(searchTerm.toLowerCase() || '');
+    const searchLower = searchTerm.toLowerCase();
+    const websiteMatch = password.website?.toLowerCase().includes(searchLower);
+    const usernameMatch = password.username?.toLowerCase().includes(searchLower);
     
     return websiteMatch || usernameMatch;
   });
@@ -51,7 +57,6 @@ const PasswordManager = () => {
   return (
     <div className="bg-gradient-to-br from-emerald-900 to-green-900 min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-
         <GlassCard className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
@@ -79,7 +84,10 @@ const PasswordManager = () => {
           </div>
 
           {showAddForm && (
-            <PasswordForm onClose={() => setShowAddForm(false)} />
+            <PasswordForm 
+              onClose={() => setShowAddForm(false)} 
+              onSuccess={handleFormSuccess}
+            />
           )}
 
           {isLoading ? (

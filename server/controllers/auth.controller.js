@@ -31,7 +31,7 @@ export const login = async (req, res) => {
         const masterKey = decryptMasterKey(
             user.encryptedMasterKey,
             user.masterKeySalt,
-            user.masterKeyIv, // Need to add this field to user model
+            user.masterKeyIv,
             password
         );
 
@@ -54,7 +54,6 @@ export const login = async (req, res) => {
             },
         });
     } catch (error) {
-        console.log("Error in login ", error);
         res.status(400).json({ success: false, message: error.message });
     }
 };
@@ -88,7 +87,7 @@ export const signup = async (req, res) => {
             verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
             encryptedMasterKey,
             masterKeySalt,
-            masterKeyIv // Add this new field
+            masterKeyIv
         });
 
         await user.save();
@@ -113,8 +112,6 @@ export const signup = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
-
-
 
 export const verifyEmail = async (req, res) => {
 	const { code } = req.body;
@@ -144,12 +141,9 @@ export const verifyEmail = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.log("error in verifyEmail ", error);
 		res.status(500).json({ success: false, message: "Server error" });
 	}
 };
-
-
 
 export const logout = async (req, res) => {
 	res.clearCookie("token");
@@ -179,7 +173,6 @@ export const forgotPassword = async (req, res) => {
 
 		res.status(200).json({ success: true, message: "Password reset link sent to your email" });
 	} catch (error) {
-		console.log("Error in forgotPassword ", error);
 		res.status(400).json({ success: false, message: error.message });
 	}
 };
@@ -210,7 +203,6 @@ export const resetPassword = async (req, res) => {
 
 		res.status(200).json({ success: true, message: "Password reset successful" });
 	} catch (error) {
-		console.log("Error in resetPassword ", error);
 		res.status(400).json({ success: false, message: error.message });
 	}
 };
@@ -226,7 +218,6 @@ export const checkAuth = async (req, res) => {
 
 		res.status(200).json({ success: true, user });
 	} catch (error) {
-		console.log("Error in checkAuth ", error);
 		res.status(400).json({ success: false, message: error.message });
 	}
 };

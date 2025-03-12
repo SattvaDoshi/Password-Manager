@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+// export const API_URL = "http://localhost:5000/api";
 export const API_URL = "https://password-manager-bhuw.onrender.com/api";
 
 // Create axios instance with default config
@@ -51,13 +52,18 @@ export const usePasswordStore = create((set) => ({
   fetchPasswords: async () => {
     set({ isLoading: true, error: null });    
     try {
+      const token = localStorage.getItem('token');
+      
       const response = await passwordAxios.get('/passwords');
+      
       set({ 
         passwords: Array.isArray(response.data) ? response.data : [], 
         isLoading: false 
       });
     } catch (error) {
       console.error('Error fetching passwords:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       set({ 
         passwords: [],
         error: error.response?.data?.message || "Error fetching passwords", 
@@ -80,7 +86,14 @@ export const usePasswordStore = create((set) => ({
       }
 
       set((state) => ({ 
-        passwords: [...state.passwords, response.data],
+        passwords: [...state.passwords, {
+          id: response.data._id,
+          website: passwordData.website,
+          username: passwordData.username,
+          notes: passwordData.notes,
+          createdAt: new Date(),
+          lastUpdated: new Date()
+        }],
         isLoading: false 
       }));
 
@@ -103,11 +116,17 @@ export const usePasswordStore = create((set) => ({
     
     try {
       const response = await passwordAxios.put(`/passwords/${id}`, passwordData);
+      
       set((state) => ({
         passwords: state.passwords.map(pwd => 
-          pwd.id === id ? { ...pwd, ...response.data } : pwd
+          pwd.id === id ? {
+            ...pwd,
+            website: passwordData.website ?? pwd.website,
+            username: passwordData.username ?? pwd.username,
+            notes: passwordData.notes ?? pwd.notes,
+            lastUpdated: new Date()
+          } : pwd
         ),
-        message: "Password updated successfully",
         isLoading: false
       }));
 
@@ -128,9 +147,9 @@ export const usePasswordStore = create((set) => ({
     
     try {
       await passwordAxios.delete(`/passwords/${id}`);
+      
       set((state) => ({
         passwords: state.passwords.filter(pwd => pwd.id !== id),
-        message: "Password deleted successfully",
         isLoading: false
       }));
 

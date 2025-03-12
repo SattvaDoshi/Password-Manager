@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({ 
-	origin: "https://passvault-xi.vercel.app", // Removed the trailing slash
+	origin: ["https://passvault-xi.vercel.app","http://localhost:5173"], // Removed the trailing slash
 	credentials: true 
 }));
 

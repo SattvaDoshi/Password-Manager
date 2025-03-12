@@ -22,6 +22,10 @@ const PasswordSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  authTag: {
+    type: String,
+    required: true
+  },
   notes: {
     type: String
   },

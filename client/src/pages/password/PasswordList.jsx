@@ -26,7 +26,6 @@ const PasswordList = ({passwords}) => {
       try {
         await updatePassword(id, editForm);
         setEditingId(null);
-        window.location.reload();
       } catch (error) {
         console.error('Error updating password:', error);
       }
@@ -41,7 +40,6 @@ const PasswordList = ({passwords}) => {
     if (window.confirm('Are you sure you want to delete this password?')) {
       try {
         await deletePassword(id);
-        window.location.reload();
       } catch (error) {
         console.error('Error deleting password:', error);
       }

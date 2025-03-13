@@ -90,6 +90,7 @@ export const usePasswordStore = create((set) => ({
           id: response.data._id,
           website: passwordData.website,
           username: passwordData.username,
+          password: passwordData.password,
           notes: passwordData.notes,
           createdAt: new Date(),
           lastUpdated: new Date()
@@ -123,6 +124,7 @@ export const usePasswordStore = create((set) => ({
             ...pwd,
             website: passwordData.website ?? pwd.website,
             username: passwordData.username ?? pwd.username,
+            password: passwordData.password ?? pwd.password,
             notes: passwordData.notes ?? pwd.notes,
             lastUpdated: new Date()
           } : pwd

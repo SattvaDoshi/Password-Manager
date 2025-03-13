@@ -57,7 +57,7 @@ const PasswordManager = () => {
   return (
     <div className="bg-gradient-to-br from-emerald-900 to-green-900 min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <GlassCard className="p-6">
+        <GlassCard key="main-container" className="p-6">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <Shield className="text-emerald-400" size={32} />

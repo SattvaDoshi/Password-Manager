@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Lock } from 'lucide-react';
+import { Plus, Lock, Eye, EyeOff } from 'lucide-react';
 import { usePasswordStore } from '../../store/passwordStore';
 
 const GlassCard = ({ children, className = '' }) => (
@@ -10,6 +10,7 @@ const GlassCard = ({ children, className = '' }) => (
 
 const PasswordForm = ({ onClose, onSuccess }) => {
   const { addPassword, isLoading } = usePasswordStore();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     website: '',
     username: '',
@@ -53,14 +54,23 @@ const PasswordForm = ({ onClose, onSuccess }) => {
             className="p-2 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
             required
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
-            className="p-2 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              className="p-2 rounded-lg bg-emerald-950/50 border border-emerald-600/30 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 w-full"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-2.5 text-emerald-400 hover:text-emerald-300 transition-colors duration-200"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
           <input
             type="text"
             placeholder="Notes (optional)"

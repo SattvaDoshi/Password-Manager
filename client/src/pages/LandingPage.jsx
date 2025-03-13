@@ -8,6 +8,13 @@ const LandingPage = () => {
     </div>
   );
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      window.location.href = '/dashboard';
+    }
+  })
+
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
